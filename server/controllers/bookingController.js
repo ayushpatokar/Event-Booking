@@ -66,7 +66,7 @@ exports.confirmBooking = async (req, res) => {
   if (!['paid', 'non_paid'].includes(paymentStatus)) {
     return res.status(400).json({ error: "Invalid payment status" });
   }
-  const booking = await Booking.findById(req.params.id).populate('eventId');
+const booking = await Booking.findById(req.params.id).populate('eventId').populate('userId');
   if (!booking) {
     return res.status(404).json({ error: "Booking not found" });
   }
@@ -88,7 +88,7 @@ exports.confirmBooking = async (req, res) => {
   event.availableSeats -= 1;
   await event.save();
 
-  await sendBookingEmail(req.user.email, event.title, booking._id);
+await sendBookingEmail(booking.userId.email, booking.userId.name, event.title);
 
   res.json({ message: 'Booking confirmed' });
 };

@@ -5,8 +5,8 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 
@@ -46,7 +46,7 @@ const sendOTPEmail = async (email, otp, type) => {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: userEmail,
+      to: email,
       subject: title,
       html: `  <div style="font-family: Arial; padding: 20px; text-align: center;">
     <h2 style="color: #6366f1;">${title}</h2>
