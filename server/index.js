@@ -45,9 +45,9 @@ app.get('/', (req, res) => {
   res.send('Eventora API Running');
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/bookings', bookingRoutes);
+https://event-booking-server-fbkl.onrender.com/api/events
+https://event-booking-server-fbkl.onrender.com/api/auth
+https://event-booking-server-fbkl.onrender.com/api/bookings
 
 const PORT = process.env.PORT || 5000;
 
