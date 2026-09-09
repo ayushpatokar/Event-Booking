@@ -37,7 +37,6 @@ exports.createEvent = async (req, res) => {
     location,
     category,
     totalSeats,
-    availableSeats,
     ticketPrice,
     imageUrl,
   } = req.body;
@@ -49,9 +48,10 @@ exports.createEvent = async (req, res) => {
       location,
       category,
       totalSeats,
-      availableSeats,
+      availableSeats: totalSeats,
       ticketPrice,
       imageUrl,
+      createdBy: req.user._id,
     });
     res.status(201).json(event);
   } catch (error) {

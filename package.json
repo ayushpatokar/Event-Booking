@@ -1,0 +1,28 @@
+{
+  "name": "event-booking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "server": "cd server && npm run start",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayushpatokar/Event-Booking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ayushpatokar/Event-Booking/issues"
+  },
+  "homepage": "https://github.com/ayushpatokar/Event-Booking#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
