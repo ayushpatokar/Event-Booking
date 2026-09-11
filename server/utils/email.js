@@ -8,9 +8,14 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  connectionTimeout: 10000, // fail fast instead of hanging for minutes
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 const sendBookingEmail = async (userEmail, userName, eventTitle) => {
+  // Kept self-contained: the booking is already saved before this runs,
+  // so a failed confirmation email shouldn't fail the whole request.
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -34,21 +39,23 @@ const sendBookingEmail = async (userEmail, userName, eventTitle) => {
 };
 
 const sendOTPEmail = async (email, otp, type) => {
-  try {
-    const title =
-      type === "account_verification"
-        ? "Verify your Eventora Account"
-        : "Event Booking";
-    const msg =
-      type === "account_verification"
-        ? `Your OTP code for account verification for Eventora is: ${otp}`
-        : `Your OTP code for event booking is: ${otp}`;
+  // No try/catch here on purpose — if sending fails, this should throw,
+  // so the calling controller's catch block can return a real error
+  // to the user instead of silently pretending it worked.
+  const title =
+    type === "account_verification"
+      ? "Verify your Eventora Account"
+      : "Event Booking";
+  const msg =
+    type === "account_verification"
+      ? `Your OTP code for account verification for Eventora is: ${otp}`
+      : `Your OTP code for event booking is: ${otp}`;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: title,
-      html: `  <div style="font-family: Arial; padding: 20px; text-align: center;">
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: title,
+    html: `  <div style="font-family: Arial; padding: 20px; text-align: center;">
     <h2 style="color: #6366f1;">${title}</h2>
 
     <p>${msg}</p>
@@ -66,13 +73,10 @@ const sendOTPEmail = async (email, otp, type) => {
       Please do not share this OTP.
     </p>
   </div>`,
-    };
+  };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`OTP email sent to ${email} for ${type}`);
-  } catch (error) {
-    console.error("Error sending OTP email:", error);
-  }
+  await transporter.sendMail(mailOptions);
+  console.log(`OTP email sent to ${email} for ${type}`);
 };
 
-module.exports = {sendBookingEmail ,sendOTPEmail };
+module.exports = { sendBookingEmail, sendOTPEmail };

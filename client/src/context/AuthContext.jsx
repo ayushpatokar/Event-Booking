@@ -23,8 +23,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       return data;
     } catch (err) {
+      // Build a plain Error carrying the backend's real message and the
+      // needsVerification flag, since Login.jsx reads err.message and
+      // err.needsVerification directly (not err.response.data).
+      const backendData = err.response?.data;
+      const normalizedError = new Error(backendData?.error || err.message || 'Login failed');
+      normalizedError.needsVerification = backendData?.needsVerification || false;
       console.error("login failed :", err);
-      throw err;
+      throw normalizedError;
     }
   };
 

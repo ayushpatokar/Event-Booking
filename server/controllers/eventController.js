@@ -9,6 +9,9 @@ exports.getAllEvents = async (req, res) => {
     if (req.query.ticketPrice) {
       filters.ticketPrice = req.query.ticketPrice;
     }
+    if (req.query.search) {
+      filters.title = { $regex: req.query.search, $options: 'i' };
+    }
 
     const events = await Event.find(filters);
     res.json(events);
@@ -30,27 +33,11 @@ exports.getEventById = async (req, res) => {
 };
 
 exports.createEvent = async (req, res) => {
-  const {
-    title,
-    description,
-    date,
-    location,
-    category,
-    totalSeats,
-    ticketPrice,
-    imageUrl,
-  } = req.body;
+  const { title, description, date, location, category, totalSeats, ticketPrice, imageUrl } = req.body;
   try {
     const event = await Event.create({
-      title,
-      description,
-      date,
-      location,
-      category,
-      totalSeats,
-      availableSeats: totalSeats,
-      ticketPrice,
-      imageUrl,
+      title, description, date, location, category,
+      totalSeats, availableSeats: totalSeats, ticketPrice, imageUrl,
       createdBy: req.user._id,
     });
     res.status(201).json(event);
@@ -60,20 +47,11 @@ exports.createEvent = async (req, res) => {
 };
 
 exports.updateEvent = async (req, res) => {
-  const {title, description, date, location, category, totalSeats, ticketPrice, imageUrl} = req.body;
+  const { title, description, date, location, category, totalSeats, ticketPrice, imageUrl } = req.body;
   try {
     const event = await Event.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        description,
-        date,
-        location,
-        category,
-        totalSeats,
-        ticketPrice,
-        imageUrl,
-      },
+      { title, description, date, location, category, totalSeats, ticketPrice, imageUrl },
       { new: true },
     );
     if (!event) {
