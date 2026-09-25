@@ -8,9 +8,18 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  connectionTimeout: 10000, // fail fast instead of hanging for minutes
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  connectionTimeout: 60000, // fail fast instead of hanging for minutes
+  greetingTimeout: 60000,
+  socketTimeout: 60000,
+  family: 4,
+});
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter failed to connect:", error.message);
+  } else {
+    console.log("✅ Email transporter is ready to send messages");
+  }
 });
 
 const sendBookingEmail = async (userEmail, userName, eventTitle) => {
