@@ -3,15 +3,17 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  connectionTimeout: 60000, // fail fast instead of hanging for minutes
-  greetingTimeout: 60000,
-  socketTimeout: 60000,
   family: 4,
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
 });
 
 transporter.verify((error, success) => {
@@ -23,10 +25,8 @@ transporter.verify((error, success) => {
 });
 
 const sendBookingEmail = async (userEmail, userName, eventTitle) => {
-  // Kept self-contained: the booking is already saved before this runs,
-  // so a failed confirmation email shouldn't fail the whole request.
   try {
-    const mailOptions = {
+    await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: userEmail,
       subject: `Booking Confirmation: ${eventTitle}`,
@@ -38,9 +38,7 @@ const sendBookingEmail = async (userEmail, userName, eventTitle) => {
           <p>Thank you for choosing Eventora!</p>
         </div>
       `,
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`Booking email sent to ${userEmail}`);
   } catch (error) {
     console.error("Error sending booking email:", error);
@@ -48,9 +46,6 @@ const sendBookingEmail = async (userEmail, userName, eventTitle) => {
 };
 
 const sendOTPEmail = async (email, otp, type) => {
-  // No try/catch here on purpose — if sending fails, this should throw,
-  // so the calling controller's catch block can return a real error
-  // to the user instead of silently pretending it worked.
   const title =
     type === "account_verification"
       ? "Verify your Eventora Account"
@@ -60,31 +55,20 @@ const sendOTPEmail = async (email, otp, type) => {
       ? `Your OTP code for account verification for Eventora is: ${otp}`
       : `Your OTP code for event booking is: ${otp}`;
 
-  const mailOptions = {
+  await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: email,
     subject: title,
     html: `  <div style="font-family: Arial; padding: 20px; text-align: center;">
     <h2 style="color: #6366f1;">${title}</h2>
-
     <p>${msg}</p>
-
-    <h1 style="
-      color: #6366f1;
-      background: #f1f1ff;
-      padding: 12px;
-      letter-spacing: 5px;
-    ">
+    <h1 style="color: #6366f1; background: #f1f1ff; padding: 12px; letter-spacing: 5px;">
       ${otp}
     </h1>
-
-    <p style="color: #777; font-size: 14px;">
-      Please do not share this OTP.
-    </p>
+    <p style="color: #777; font-size: 14px;">Please do not share this OTP.</p>
   </div>`,
-  };
+  });
 
-  await transporter.sendMail(mailOptions);
   console.log(`OTP email sent to ${email} for ${type}`);
 };
 
