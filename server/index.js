@@ -20,6 +20,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://event-booking-client-psi.vercel.app",
+      "https://eventora.space",
+      "https://www.eventora.space",
     ],
     credentials: true,
   }),
