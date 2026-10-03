@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/axios';
 import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaRegClock, FaTicketAlt, FaShieldAlt } from 'react-icons/fa';
 
@@ -7,13 +7,26 @@ const Home = () => {
     const [events, setEvents] = useState([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const searchWrapperRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fetchEvents();
-        }, 400); // 400ms debounce
+        }, 400);
         return () => clearTimeout(timeoutId);
     }, [search]);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const fetchEvents = async () => {
         try {
@@ -26,10 +39,13 @@ const Home = () => {
         }
     };
 
+    const handleSuggestionClick = (eventId) => {
+        setShowSuggestions(false);
+        navigate(`/events/${eventId}`);
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
-            {/* Hero Section - full width edge-to-edge: no rounded corners, no top/left/right margin.
-                Only mb-12 kept, to space it from the section below. */}
             <div className="relative bg-black text-white overflow-hidden mb-12 shadow-2xl">
                 <div
                     className="absolute inset-0 opacity-40 bg-cover bg-center"
@@ -39,7 +55,6 @@ const Home = () => {
                 ></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
 
-                {/* Inner padding scaled down for mobile (px-6 py-14) and bigger on desktop (md:p-20) */}
                 <div className="relative px-6 py-14 md:p-20 text-center flex flex-col items-center z-10 animate-fade-in-up">
                     <span className="bg-white/20 text-white backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-6 border border-white/20">Welcome to Eventora</span>
                     <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight tracking-tight drop-shadow-lg">
@@ -49,24 +64,51 @@ const Home = () => {
                         Discover the best tech conferences, late-night music festivals, and hands-on workshops happening directly in your area. Secure your spot today.
                     </p>
 
-                    <div className="w-full max-w-2xl mx-auto relative flex items-center shadow-2xl group transition-transform duration-300 focus-within:scale-[1.02]">
-                        <FaSearch className="absolute left-6 text-gray-500 text-xl group-focus-within:text-black transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search events by title..."
-                            className="w-full pl-16 pr-6 py-4 md:py-5 rounded-full text-base md:text-lg text-black bg-white/95 backdrop-blur-sm border-2 border-transparent focus:border-indigo-400 focus:outline-none transition-all placeholder-gray-400 font-medium"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
+                    <div ref={searchWrapperRef} className="w-full max-w-2xl mx-auto relative">
+                        <div className="relative flex items-center shadow-2xl group transition-transform duration-300 focus-within:scale-[1.02]">
+                            <FaSearch className="absolute left-6 text-gray-500 text-xl group-focus-within:text-black transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search events by title..."
+                                className="w-full pl-16 pr-6 py-4 md:py-5 rounded-full text-base md:text-lg text-black bg-white/95 backdrop-blur-sm border-2 border-transparent focus:border-indigo-400 focus:outline-none transition-all placeholder-gray-400 font-medium"
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setShowSuggestions(true);
+                                }}
+                                onFocus={() => {
+                                    if (search.trim()) setShowSuggestions(true);
+                                }}
+                            />
+                        </div>
+
+                        {showSuggestions && search.trim() && (
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-20 text-left">
+                                {events.length > 0 ? (
+                                    events.slice(0, 5).map((event) => (
+                                        <button
+                                            key={event._id}
+                                            onClick={() => handleSuggestionClick(event._id)}
+                                            className="w-full flex items-center gap-3 px-5 py-3 hover:bg-indigo-50 transition text-left border-b border-gray-50 last:border-0"
+                                        >
+                                            <FaSearch className="text-gray-300 shrink-0" />
+                                            <div className="min-w-0">
+                                                <p className="text-gray-900 font-semibold truncate">{event.title}</p>
+                                                <p className="text-gray-400 text-xs truncate">{event.category} • {event.location}</p>
+                                            </div>
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="px-5 py-4 text-gray-400 text-sm">No matching events found.</div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Everything from here down gets a consistent left/right padding of px-4 */}
             <div className="px-4">
-                {/* Why Choose Us / Features row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    {/* h-full added so all three cards match height evenly in the row (grid already stretches them, this just makes it explicit) */}
                     <div className="h-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:-translate-y-1 transition duration-300">
                         <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-md shadow-indigo-200/50">
                             <FaRegClock />
@@ -156,7 +198,6 @@ const Home = () => {
                 )}
             </div>
 
-            {/* Footer - also gets px-4 to match the rest of the page below the hero */}
             <footer className="px-4 mt-auto pt-16 pb-8 border-t border-gray-200 text-center">
                 <div className="flex justify-center items-center gap-2 mb-4">
                     <FaTicketAlt className="text-gray-800 text-2xl" />

@@ -86,22 +86,27 @@ const AdminDashboard = () => {
 
     return (
         <div className="animate-fade-in-up">
-            {/* Banner — full width, no rounded corners, touches both edges of the page (same pattern as Home's hero) */}
-            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-6 sm:px-10 py-8 mb-8 shadow-lg flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Admin Dashboard</h1>
-                    <p className="text-white/80">Manage events and manually confirm bookings.</p>
+            <div
+                className="relative w-full bg-cover bg-center text-white px-6 sm:px-10 py-8 mb-8 shadow-lg overflow-hidden"
+                style={{
+                    backgroundImage: "url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=3000&auto=format&fit=crop')"
+                }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50"></div>
+                <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Admin Dashboard</h1>
+                        <p className="text-white/80">Manage events and manually confirm bookings.</p>
+                    </div>
+                    <button
+                        onClick={() => setShowEventForm(!showEventForm)}
+                        className="w-full md:w-auto bg-white text-indigo-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition shadow-md"
+                    >
+                        {showEventForm ? 'Cancel Creation' : '+ Create New Event'}
+                    </button>
                 </div>
-                <button
-                    onClick={() => setShowEventForm(!showEventForm)}
-                    className="w-full md:w-auto bg-white text-indigo-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition shadow-md"
-                >
-                    {showEventForm ? 'Cancel Creation' : '+ Create New Event'}
-                </button>
             </div>
 
-            {/* Content below the banner now spans the full page width, with just a small consistent
-                side gutter (px-4 on mobile, px-6 on larger screens) instead of a centered max-width box */}
             <div className="px-4 sm:px-6">
                 {/* Admin Stats Row — 1 column on mobile, 3 columns from md up */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
